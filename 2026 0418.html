@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歲月流光 ｜ 新北市立碧華國民中學</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS 變數定義 */
+        :root {
+            --bg-color: #0d0d0d;
+            --text-main: #f0f0f0;
+            --text-accent: #d4af37; /* 復古金 */
+            --frame-bg: #fdfbf7;
+            --font-serif: 'Noto Serif TC', serif;
+            --font-sans: 'Noto Sans TC', sans-serif;
+            --letterbox-height: 8vh;
+        }
+
+        /* 基礎重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 電影質感：雜訊噪點 (Film Grain) */
+        .film-grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 電影質感：上下黑邊 (Letterbox) */
+        .letterbox {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: var(--letterbox-height);
+            background-color: #000;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .letterbox.top { top: 0; }
+        .letterbox.bottom { bottom: 0; }
+
+        /* 排版共用 */
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        /* 滾動揭示動畫初始狀態 */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 1.2s cubic-bezier(0.215, 0.610, 0.355, 1), 
+                        transform 1.2s cubic-bezier(0.215, 0.610, 0.355, 1);
+        }
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-1 { transition-delay: 0.2s; }
+        .delay-2 { transition-delay: 0.4s; }
+
+        /* 第一幕：全幅首頁 */
+        #hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            padding: var(--letterbox-height) 0;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: -10%;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background-image: url('https://github.com/wilsonlin00611-tech/ch/blob/main/photo1.jpg?raw=true');
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            /* 預設暗化遮罩 */
+            filter: brightness(0.4) contrast(1.1);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 20px;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--text-accent);
+            font-family: var(--font-sans);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+        }
+
+        /* 敘事章節容器 */
+        .narrative-section {
+            position: relative;
+            padding: 15vh 10vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5vw;
+            min-height: 100vh;
+        }
+
+        .narrative-section.reverse {
+            flex-direction: row-reverse;
+        }
+
+        /* 文字區塊 */
+        .text-content {
+            flex: 1;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .text-content h2 {
+            font-size: 2.5rem;
+            color: var(--text-accent);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .text-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--text-accent);
+        }
+
+        .text-content p {
+            font-size: 1.1rem;
+            color: #ccc;
+            text-align: justify;
+            letter-spacing: 0.05em;
+        }
+
+        /* 實體畫框/拍立得樣式 */
+        .image-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .polaroid-frame {
+            background-color: var(--frame-bg);
+            padding: 3% 3% 12% 3%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), 
+                        inset 0 0 10px rgba(0,0,0,0.1);
+            max-width: 100%;
+            transition: transform 0.5s ease;
+        }
+
+        .narrative-section:nth-child(even) .polaroid-frame {
+            transform: rotate(3deg);
+        }
+        
+        .narrative-section:nth-child(odd) .polaroid-frame {
+            transform: rotate(-2deg);
+        }
+
+        .polaroid-frame:hover {
+            transform: scale(1.02) rotate(0deg) !important;
+            z-index: 10;
+        }
+
+        .polaroid-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: grayscale(20%) sepia(15%);
+        }
+
+        /* 視差裝飾文字 */
+        .bg-text {
+            position: absolute;
+            font-family: var(--font-serif);
+            font-size: 15vw;
+            color: rgba(255, 255, 255, 0.02);
+            white-space: nowrap;
+            z-index: -1;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* 頁尾 */
+        footer {
+            padding: 10vh 20px calc(10vh + var(--letterbox-height)) 20px;
+            text-align: center;
+            background-color: #050505;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-links {
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-accent);
+            text-decoration: none;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-main);
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+        }
+
+        .footer-links .divider {
+            color: #444;
+            margin: 0 15px;
+            font-weight: 300;
+        }
+
+        .copyright-text {
+            font-family: var(--font-serif);
+            color: #666;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* 響應式設計 (RWD) */
+        @media (max-width: 900px) {
+            .narrative-section, .narrative-section.reverse {
+                flex-direction: column;
+                justify-content: center;
+                padding: 12vh 5vw;
+                gap: 40px;
+            }
+
+            .polaroid-frame {
+                transform: none !important; /* 手機版取消旋轉以利閱讀 */
+                padding: 15px 15px 50px 15px;
+            }
+
+            .text-content {
+                max-width: 100%;
+                text-align: center;
+            }
+
+            .text-content h2::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .text-content p {
+                text-align: left;
+            }
+
+            .footer-links a {
+                display: block;
+                margin: 10px 0;
+            }
+
+            .footer-links .divider {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="film-grain"></div>
+    <div class="letterbox top"></div>
+    <div class="letterbox bottom"></div>
+
+    <section id="hero">
+        <div class="hero-bg parallax" data-speed="0.4"></div>
+        <div class="hero-content">
+            <h1 class="hero-title reveal-up">歲月流光，青春倒影</h1>
+            <p class="hero-subtitle reveal-up delay-1">新北市立碧華國民中學</p>
+        </div>
+    </section>
+
+    <section class="narrative-section">
+        <div class="bg-text parallax" data-speed="-0.2" style="top: 10%; right: -5%;">MORNING</div>
+        <div class="text-content reveal-up">
+            <h2>晨曦中的鐘聲</h2>
+            <p class="reveal-up delay-1">每一聲清脆的鐘聲，都是喚醒青春的序曲。當第一縷晨光穿透樹梢，灑落在熟悉的校園裡，紅磚牆上斑駁的光影，默默記錄著無數個奔跑的早晨。這裡是成長的起點，是青澀年代最溫暖的搖籃。</p>
+        </div>
+        <div class="image-wrapper reveal-up delay-2">
+            <div class="polaroid-frame">
+                <img src="https://github.com/wilsonlin00611-tech/ch/blob/main/photo2.jpg?raw=true" alt="晨曦中的校園">
+            </div>
+        </div>
+    </section>
+
+    <section class="narrative-section reverse">
+        <div class="bg-text parallax" data-speed="-0.3" style="top: 20%; left: -10%;">KNOWLEDGE</div>
+        <div class="text-content reveal-up">
+            <h2>知識的迴廊</h2>
+            <p class="reveal-up delay-1">翻開書本，就像推開一扇通往廣闊世界的窗。長長的走廊迴盪著朗朗讀書聲，在這裡，每一次天馬行空的發問都被珍視，少年們充滿好奇的眼睛，都如夜空中的星光般閃爍著對未來的渴望。</p>
+        </div>
+        <div class="image-wrapper reveal-up delay-2">
+            <div class="polaroid-frame">
+                <img src="https://github.com/wilsonlin00611-tech/ch/blob/main/photo3.png?raw=true" alt="知識的迴廊">
+            </div>
+        </div>
+    </section>
+
+    <section class="narrative-section">
+        <div class="bg-text parallax" data-speed="-0.2" style="top: 15%; right: -15%;">YOUTH</div>
+        <div class="text-content reveal-up">
+            <h2>操場上的青春</h2>
+            <p class="reveal-up delay-1">汗水與笑聲交織的跑道，是我們曾擁有過最狂熱的宇宙。每一次的衝刺、每一次跌倒後再站起來的堅決，那些在陽光下揮灑汗水的瞬間，教會我們的勇敢與堅韌，遠比課本裡的文字更加深刻。</p>
+        </div>
+        <div class="image-wrapper reveal-up delay-2">
+            <div class="polaroid-frame">
+                <img src="https://github.com/wilsonlin00611-tech/ch/blob/main/photo4.jpg?raw=true" alt="操場上的青春">
+            </div>
+        </div>
+    </section>
+
+    <section class="narrative-section reverse">
+        <div class="bg-text parallax" data-speed="-0.4" style="top: 30%; left: -5%;">ETERNITY</div>
+        <div class="text-content reveal-up">
+            <h2>永遠的母校</h2>
+            <p class="reveal-up delay-1">時光荏苒，畢業的驪歌或許已經在風中遠去，但碧華國中的精神，早已化作生命中不可磨滅的印記。無論未來走向何方，這片孕育夢想的土地，將如那金色的夕陽，永遠溫暖著每一位學子的歸途。</p>
+        </div>
+        <div class="image-wrapper reveal-up delay-2">
+            <div class="polaroid-frame">
+                <img src="https://github.com/wilsonlin00611-tech/ch/blob/main/photo5.jpg?raw=true" alt="永遠的母校">
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links reveal-up">
+            <a href="https://www.bhjh.ntpc.edu.tw/" target="_blank" rel="noopener noreferrer">碧華國中 官方網站</a>
+            <span class="divider">|</span>
+            <a href="https://www.facebook.com/bhjh.ntpc/" target="_blank" rel="noopener noreferrer">Facebook 粉絲專頁</a>
+        </div>
+        <p class="copyright-text reveal-up delay-1">【翊華程式設計 | 網頁與作品及製作】</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Intersection Observer - 滾動揭示動畫 (Scroll Reveal)
+            const revealElements = document.querySelectorAll('.reveal-up');
+            
+            const revealOptions = {
+                threshold: 0.15, // 當元素 15% 進入視窗時觸發
+                rootMargin: "0px 0px -50px 0px" 
+            };
+
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // 動畫觸發後即可取消觀察，提升效能
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, revealOptions);
+
+            revealElements.forEach(el => {
+                revealObserver.observe(el);
+            });
+
+            // 2. 視差滾動效果 (Parallax)
+            const parallaxElements = document.querySelectorAll('.parallax');
+
+            window.addEventListener('scroll', () => {
+                // 使用 requestAnimationFrame 確保滾動動畫平滑
+                requestAnimationFrame(() => {
+                    let scrollY = window.pageYOffset;
+
+                    parallaxElements.forEach(el => {
+                        let speed = el.getAttribute('data-speed');
+                        // 針對背景圖片與文字有不同的視差處理方式
+                        if(el.classList.contains('hero-bg')) {
+                            el.style.transform = `translateY(${scrollY * speed}px)`;
+                        } else {
+                            el.style.transform = `translateY(${scrollY * speed}px)`;
+                        }
+                    });
+                });
+            });
+            
+            // 確保首頁元素載入時立刻顯示
+            setTimeout(() => {
+                document.querySelectorAll('#hero .reveal-up').forEach(el => {
+                    el.classList.add('active');
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
